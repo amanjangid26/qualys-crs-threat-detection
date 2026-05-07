@@ -336,7 +336,6 @@
   to achieve local privilege escalation to root without authentication.
 
   Commands:
-    cp /bin/bash pkexec
     ./pkexec
 
 
