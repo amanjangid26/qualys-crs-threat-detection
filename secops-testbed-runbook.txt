@@ -312,7 +312,6 @@
     grep aws_secret_access_key config.txt
     find / -name .aws/credentials
     mlocate .aws/credentials
-    locate secrets.txt
 
 
   TEST 20 — Environment Variable Enumeration via printenv
