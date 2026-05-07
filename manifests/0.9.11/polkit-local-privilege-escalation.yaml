@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: polkit-local-privilege-escalation
+spec:
+  restartPolicy: Never
+  containers:
+  - name: polkit-local-privilege-escalation
+    image: angelrita/base-ubuntu:latest
+    #imagePullPolicy: Never
+    command: ['sh']
+    args: ['-c', 'cp /bin/bash pkexec; ./pkexec; sleep infinity']

