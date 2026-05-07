@@ -1,6 +1,6 @@
-# SecOps Testbed — Cloud Runtime Security Testing
+# CRS Testbed - Container Runtime Security Testing
 
-A collection of Kubernetes manifests and commands for testing cloud runtime security detection coverage across 25 real-world attack techniques.
+A collection of Kubernetes manifests and commands for testing container runtime security detection coverage across 25 real-world attack techniques.
 
 ---
 
