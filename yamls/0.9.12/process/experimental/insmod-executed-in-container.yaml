@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: insmod-executed-in-container
+spec:
+  restartPolicy: Never
+  containers:
+  - name: insmod-executed-in-container
+    image: angelrita/base-ubuntu:latest
+    #imagePullPolicy: Never
+    command: ['sh']
+    args: ['-c', 'modprobe br_netfilter; insmod br_netfilter; sleep infinity']

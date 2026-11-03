@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: decoding-payload-in-container
+spec:
+  restartPolicy: Never
+  containers:
+  - name: decoding-payload-in-container
+    image: angelrita/base-ubuntu:latest
+    #imagePullPolicy: Never
+    command: ['sh']
+    args: ['-c', 'echo "bWFsaWNpb3VzIHBheWxvYWQ=" | base64 --decode; sleep infinity']

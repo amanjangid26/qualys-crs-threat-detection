@@ -1,0 +1,15 @@
+#command: curl against container runtime socket (T1611)
+#note: process_name should be curl/docker/crictl/ctr/nerdctl/podman, process_cmd_line contains docker.sock/containerd.sock/crio.sock
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: container-runtime-socket-command-execution
+spec:
+  restartPolicy: Never
+  containers:
+  - name: container-runtime-socket-command-execution
+    image: angelrita/base-ubuntu:latest
+    #imagePullPolicy: Never
+    command: ['sh']
+    args: ["-c", "curl --unix-socket /var/run/docker.sock http://localhost/v1.24/containers/json; sleep infinity"]

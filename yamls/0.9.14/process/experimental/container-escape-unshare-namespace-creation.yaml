@@ -1,0 +1,15 @@
+#command: unshare to create new namespaces (T1611)
+#note: process_name should be unshare, process_cmd_line contains --mount/--pid/--user/-m/-p/-U/-r, actor not systemd/init/containerd/dockerd/kubelet
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: container-escape-unshare-namespace-creation
+spec:
+  restartPolicy: Never
+  containers:
+  - name: container-escape-unshare-namespace-creation
+    image: angelrita/base-ubuntu:latest
+    #imagePullPolicy: Never
+    command: ['sh']
+    args: ["-c", "unshare --mount /bin/bash -c 'id'; sleep infinity"]

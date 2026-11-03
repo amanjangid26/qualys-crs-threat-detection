@@ -1,0 +1,15 @@
+#command: chroot to /host filesystem (T1611)
+#note: process_name should be chroot, process_cmd_line contains /host or /rootfs or /mnt/root
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: container-escape-chroot-host-filesystem
+spec:
+  restartPolicy: Never
+  containers:
+  - name: container-escape-chroot-host-filesystem
+    image: angelrita/base-ubuntu:latest
+    #imagePullPolicy: Never
+    command: ['sh']
+    args: ["-c", "chroot /host /bin/bash -c 'id'; sleep infinity"]

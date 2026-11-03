@@ -1,0 +1,15 @@
+#command: read sensitive host path files via /host mount (T1611)
+#note: process_name should be cat/head/tail/less/more/ls/find/grep/awk/sed, process_cmd_line contains /host/etc/shadow or similar
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: container-escape-sensitive-host-path-access
+spec:
+  restartPolicy: Never
+  containers:
+  - name: container-escape-sensitive-host-path-access
+    image: angelrita/base-ubuntu:latest
+    #imagePullPolicy: Never
+    command: ['sh']
+    args: ["-c", "cat /host/etc/shadow; sleep infinity"]

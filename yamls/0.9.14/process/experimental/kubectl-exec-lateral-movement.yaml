@@ -1,0 +1,15 @@
+#command: kubectl exec from within a container (T1609)
+#note: process_name should be kubectl, process_cmd_line contains exec and -- or -it or -c
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubectl-exec-lateral-movement
+spec:
+  restartPolicy: Never
+  containers:
+  - name: kubectl-exec-lateral-movement
+    image: angelrita/base-ubuntu:latest
+    #imagePullPolicy: Never
+    command: ['sh']
+    args: ["-c", "kubectl exec -it target-pod -- /bin/sh -c id; sleep infinity"]

@@ -1,0 +1,15 @@
+#command: nsenter into host PID 1 namespace (T1611)
+#note: process_name should be nsenter, process_cmd_line contains --target 1 or -t 1 or -t1
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: container-escape-nsenter-host-namespace
+spec:
+  restartPolicy: Never
+  containers:
+  - name: container-escape-nsenter-host-namespace
+    image: angelrita/base-ubuntu:latest
+    #imagePullPolicy: Never
+    command: ['sh']
+    args: ["-c", "nsenter --target 1 --mount -- /bin/bash -c 'id'; sleep infinity"]

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: remove-bulk-data-from-disk
+spec:
+  restartPolicy: Never
+  containers:
+  - name: remove-bulk-data-from-disk
+    image: angelrita/base-ubuntu:latest
+    #imagePullPolicy: Never
+    command: ['sh']
+    args: ['-c', 'shred -u /tmp/testfile; sleep infinity']
