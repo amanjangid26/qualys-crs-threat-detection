@@ -116,7 +116,7 @@ The 102 main tests cover **11 of the 14 MITRE ATT&CK Enterprise tactics** and **
 </details>
 
 > [!NOTE]
-> Each test is mapped to the **one ATT&CK technique that best describes the behaviour it simulates**. This is a guide to what the test set exercises, not the detection product's official rule mapping. Many tests also touch secondary techniques; for example, a reverse shell also involves command and control. The 26 [not-fired rules](#-not-fired-rules) are not included in these counts.
+> Each test is mapped to the **one ATT&CK technique that best describes the behaviour it simulates**. This is a guide to what the test set exercises, not the detection product's official rule mapping. Many tests also touch secondary techniques; for example, a reverse shell also involves command and control.
 
 ---
 
@@ -260,7 +260,6 @@ python3 run_rules.py [options]
 | `--pod-image` | `angelrita/base-ubuntu:latest` | Container image for the test pod |
 | `--delay` | `3` | Seconds to wait between tests |
 | `--yamls-root` | `./yamls` | Folder containing the rule manifests |
-| `-d`, `--not-fired` | off | Show the [not-fired rules](#-not-fired-rules) instead |
 | `-rules`, `--rules` | off | Rebuild `command_notebook.txt` and exit |
 
 **Common examples**
@@ -427,69 +426,6 @@ The numbers below match the numbers in the tool's menu, and each rule links to i
 
 ---
 
-## ❔ Not-fired rules
-
-The `yamls/not-fired/` folder holds **26 rules** that did not raise an alert during internal testing. They're kept separately so that the main list contains only rules that are expected to alert. To run them:
-
-```bash
-python3 run_rules.py --not-fired
-```
-
-These use their own numbering, shown below.
-
-<details>
-<summary><b>Release 0.9.12</b> — 7 production, 4 experimental</summary>
-
-| # | Rule | Stage | Manifest |
-|--:|------|:-----:|----------|
-| 1 | `defense-evasion-via-rootkit` | ✅ Production | [defense-evasion-via-rootkit.yaml](yamls/not-fired/0.9.12/process/defense-evasion-via-rootkit.yaml) |
-| 2 | `diamorphine-process-hiding` | ✅ Production | [diamorphine-process-hiding.yaml](yamls/not-fired/0.9.12/process/diamorphine-process-hiding.yaml) |
-| 3 | `dns-lookup-for-often-security-tool-domain-detected` | ✅ Production | [dns-lookup-for-often-security-tool-domain-detected.yaml](yamls/not-fired/0.9.12/process/dns-lookup-for-often-security-tool-domain-detected.yaml) |
-| 4 | `process-capability-enumeration` | ✅ Production | [process-capability-enumeration.yaml](yamls/not-fired/0.9.12/process/process-capability-enumeration.yaml) |
-| 5 | `redis-xackdel-with-large-ids-count-possible-cve-2025-62507-attempt` | ✅ Production | [redis-xackdel-with-large-ids-count-possible-cve-2025-62507-attempt.yaml](yamls/not-fired/0.9.12/process/redis-xackdel-with-large-ids-count-possible-cve-2025-62507-attempt.yaml) |
-| 6 | `root-shell-via-sudo-cve-2025-32463` | ✅ Production | [root-shell-via-sudo-cve-2025-32463.yaml](yamls/not-fired/0.9.12/process/root-shell-via-sudo-cve-2025-32463.yaml) |
-| 7 | `sudo-chroot-privilege-escalation-cve-2025-32463` | ✅ Production | [sudo-chroot-privilege-escalation-cve-2025-32463.yaml](yamls/not-fired/0.9.12/process/sudo-chroot-privilege-escalation-cve-2025-32463.yaml) |
-| 13 | `decoding-payload-in-container` | 🧪 Experimental | [decoding-payload-in-container.yaml](yamls/not-fired/0.9.12/process/experimental/decoding-payload-in-container.yaml) |
-| 14 | `network-traffic-capture-via-cap-net-raw` | 🧪 Experimental | [network-traffic-capture-via-cap-net-raw.yaml](yamls/not-fired/0.9.12/process/experimental/network-traffic-capture-via-cap-net-raw.yaml) |
-| 15 | `potential-privilege-escalation-via-linux-dac-permissions` | 🧪 Experimental | [potential-privilege-escalation-via-linux-dac-permissions.yaml](yamls/not-fired/0.9.12/process/experimental/potential-privilege-escalation-via-linux-dac-permissions.yaml) |
-| 16 | `redis-cli-eval-script-usage-possible-cve-2025-49844-attempt` | 🧪 Experimental | [redis-cli-eval-script-usage-possible-cve-2025-49844-attempt.yaml](yamls/not-fired/0.9.12/process/experimental/redis-cli-eval-script-usage-possible-cve-2025-49844-attempt.yaml) |
-
-</details>
-
-<details>
-<summary><b>Release 0.9.13</b> — 5 production, 7 experimental</summary>
-
-| # | Rule | Stage | Manifest |
-|--:|------|:-----:|----------|
-| 8 | `gitlab-runner-spawns-suspicious-process` | ✅ Production | [gitlab-runner-spawns-suspicious-process.yaml](yamls/not-fired/0.9.13/process/gitlab-runner-spawns-suspicious-process.yaml) |
-| 9 | `glibc-dns-memory-leak-cve-2026-0915` | ✅ Production | [glibc-dns-memory-leak-cve-2026-0915.yaml](yamls/not-fired/0.9.13/process/glibc-dns-memory-leak-cve-2026-0915.yaml) |
-| 10 | `mongodb-unauthorized-data-exfiltration-cve-2025-14847` | ✅ Production | [mongodb-unauthorized-data-exfiltration-cve-2025-14847.yaml](yamls/not-fired/0.9.13/process/mongodb-unauthorized-data-exfiltration-cve-2025-14847.yaml) |
-| 11 | `postgresql-copy-to-program-execution-cve-2025-1094` | ✅ Production | [postgresql-copy-to-program-execution-cve-2025-1094.yaml](yamls/not-fired/0.9.13/process/postgresql-copy-to-program-execution-cve-2025-1094.yaml) |
-| 12 | `redis-output-buffer-dos-cve-2025-21605` | ✅ Production | [redis-output-buffer-dos-cve-2025-21605.yaml](yamls/not-fired/0.9.13/process/redis-output-buffer-dos-cve-2025-21605.yaml) |
-| 17 | `argocd-api-unauthorized-access-cve-2025-55190` | 🧪 Experimental | [argocd-api-unauthorized-access-cve-2025-55190.yaml](yamls/not-fired/0.9.13/process/experimental/argocd-api-unauthorized-access-cve-2025-55190.yaml) |
-| 18 | `coredns-acl-bypass-toctou-cve-2026-26017` | 🧪 Experimental | [coredns-acl-bypass-toctou-cve-2026-26017.yaml](yamls/not-fired/0.9.13/process/experimental/coredns-acl-bypass-toctou-cve-2026-26017.yaml) |
-| 19 | `couchdb-spawns-suspicious-process` | 🧪 Experimental | [couchdb-spawns-suspicious-process.yaml](yamls/not-fired/0.9.13/process/experimental/couchdb-spawns-suspicious-process.yaml) |
-| 20 | `gitea-spawns-suspicious-process` | 🧪 Experimental | [gitea-spawns-suspicious-process.yaml](yamls/not-fired/0.9.13/process/experimental/gitea-spawns-suspicious-process.yaml) |
-| 21 | `gitlab-saml-auth-bypass-cve-2025-25291` | 🧪 Experimental | [gitlab-saml-auth-bypass-cve-2025-25291.yaml](yamls/not-fired/0.9.13/process/experimental/gitlab-saml-auth-bypass-cve-2025-25291.yaml) |
-| 22 | `grafana-enterprise-privilege-escalation-cve-2025-41115` | 🧪 Experimental | [grafana-enterprise-privilege-escalation-cve-2025-41115.yaml](yamls/not-fired/0.9.13/process/experimental/grafana-enterprise-privilege-escalation-cve-2025-41115.yaml) |
-| 23 | `tekton-pipeline-resolver-dos-cve-2026-33022` | 🧪 Experimental | [tekton-pipeline-resolver-dos-cve-2026-33022.yaml](yamls/not-fired/0.9.13/process/experimental/tekton-pipeline-resolver-dos-cve-2026-33022.yaml) |
-
-</details>
-
-<details>
-<summary><b>Release 0.9.14</b> — 3 experimental</summary>
-
-| # | Rule | Stage | Manifest |
-|--:|------|:-----:|----------|
-| 24 | `container-escape-cgroup-release-agent` | 🧪 Experimental | [container-escape-cgroup-release-agent.yaml](yamls/not-fired/0.9.14/process/experimental/container-escape-cgroup-release-agent.yaml) |
-| 25 | `container-escape-sensitive-host-path-access` | 🧪 Experimental | [container-escape-sensitive-host-path-access.yaml](yamls/not-fired/0.9.14/process/experimental/container-escape-sensitive-host-path-access.yaml) |
-| 26 | `react-xss-cve-2025-55182` | 🧪 Experimental | [react-xss-cve-2025-55182.yaml](yamls/not-fired/0.9.14/process/experimental/react-xss-cve-2025-55182.yaml) |
-
-</details>
-
-
----
-
 ## 🧩 Running a single test without the tool
 
 Every rule file is also a standalone pod manifest that runs its attack command when created:
@@ -514,8 +450,7 @@ kubectl delete -f yamls/0.9.12/process/gdb-executed-in-container.yaml
     ├── 0.9.11/process/            11 rules
     ├── 0.9.12/process/            11 rules + experimental/ (8)
     ├── 0.9.13/process/            17 rules + experimental/ (26)
-    ├── 0.9.14/process/             1 rule  + experimental/ (14)
-    └── not-fired/                 26 rules that did not alert in testing
+    └── 0.9.14/process/             1 rule  + experimental/ (14)
 ```
 
 ---
